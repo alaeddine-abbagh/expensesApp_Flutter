@@ -2,8 +2,8 @@ import 'package:expensesapp/models/expense.dart';
 import 'package:flutter/material.dart';
 
 class NewExpenseState extends StatefulWidget {
-  const NewExpenseState({required this.registredExpenses, super.key});
-  final List<Expense> registredExpenses;
+  const NewExpenseState({required this.onAddExpense, super.key});
+  final Function onAddExpense;
   @override
   State<StatefulWidget> createState() {
     return _NewExpenseState();
@@ -63,19 +63,19 @@ class _NewExpenseState extends State<NewExpenseState> {
       return;
     }
 
-    final newexpense = Expense(
+    final newExpense = Expense(
         title: textController.text.trim(),
         amount: double.tryParse(costController.text)!,
         date: _selectedDate!,
         category: _selectedCategory);
-    widget.registredExpenses.add(newexpense);
-    print(widget.registredExpenses.length);
+    widget.onAddExpense(newExpense);
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
         child: Column(
           children: [
             TextField(
