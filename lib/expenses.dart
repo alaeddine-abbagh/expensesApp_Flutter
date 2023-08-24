@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:expensesapp/models/expense.dart';
 import 'package:expensesapp/widgets/expenses_list/expenses_list.dart';
 import 'package:expensesapp/widgets/newExpense.dart';
+import 'package:expensesapp/widgets/chart/chart.dart';
 
 class Expenses extends StatefulWidget {
   const Expenses({super.key});
@@ -32,9 +33,24 @@ class _ExpensesState extends State<Expenses> {
   }
 
   void _deleteExpense(Expense expense) {
+    final expenseIndex = _registredExpenses.indexOf(expense);
     setState(() {
       _registredExpenses.remove(expense);
     });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 3),
+        content: const Text('Expense deleted'),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            setState(() {
+              _registredExpenses.insert(expenseIndex, expense);
+            });
+          },
+        ),
+      ),
+    );
   }
 
   void _openExpenseOverlay() {
@@ -47,9 +63,23 @@ class _ExpensesState extends State<Expenses> {
 
   @override
   Widget build(BuildContext contect) {
+    final width = MediaQuery.of(context).size.width;
+    print(width);
+    final height = MediaQuery.of(context).size.width;
+
+    MediaQuery.of(context).size.height;
+
+    Widget mainContent = const Center(
+      child: Text("Feel free to add any expenses"),
+    );
+    if (_registredExpenses.isNotEmpty) {
+      mainContent = ExpensesList(
+          expenseslist: _registredExpenses, onRemove: _deleteExpense);
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Flutter expense Tracker'),
+        title: const Text('Flutter expense Tracker'),
         actions: [
           IconButton(
             onPressed: _openExpenseOverlay,
@@ -57,15 +87,19 @@ class _ExpensesState extends State<Expenses> {
           )
         ],
       ),
-      body: Column(
-        children: [
-          const Text('The chart'),
-          Expanded(
-            child: ExpensesList(
-                expenseslist: _registredExpenses, onRemove: _deleteExpense),
-          ),
-        ],
-      ),
+      body: width < 600
+          ? Column(
+              children: [
+                Chart(expenses: _registredExpenses),
+                Expanded(child: mainContent),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: Chart(expenses: _registredExpenses)),
+                Expanded(child: mainContent),
+              ],
+            ),
     );
   }
 }
